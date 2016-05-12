@@ -1,0 +1,22 @@
+--cpu Cortex-M3
+"lcd_dg-122332\system_stm32f1xx.o"
+"lcd_dg-122332\startup_stm32f103xb.o"
+"lcd_dg-122332\main.o"
+"lcd_dg-122332\stm32f1xx_hal_msp.o"
+"lcd_dg-122332\stm32f1xx_it.o"
+"lcd_dg-122332\stm32f1xx_hal_cortex.o"
+"lcd_dg-122332\stm32f1xx_hal_flash.o"
+"lcd_dg-122332\stm32f1xx_hal_tim.o"
+"lcd_dg-122332\stm32f1xx_hal_rcc.o"
+"lcd_dg-122332\stm32f1xx_hal_rcc_ex.o"
+"lcd_dg-122332\stm32f1xx_hal_tim_ex.o"
+"lcd_dg-122332\stm32f1xx_hal_dma.o"
+"lcd_dg-122332\stm32f1xx_hal_pwr.o"
+"lcd_dg-122332\stm32f1xx_hal_flash_ex.o"
+"lcd_dg-122332\stm32f1xx_hal.o"
+"lcd_dg-122332\stm32f1xx_hal_gpio.o"
+"lcd_dg-122332\sed-1520daa.o"
+--library_type=microlib --strict --scatter "LCD_DG-122332\LCD_DG-122332.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "LCD_DG-122332.map" -o LCD_DG-122332\LCD_DG-122332.axf
