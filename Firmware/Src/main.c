@@ -35,6 +35,7 @@
 
 /* USER CODE BEGIN Includes */
 #include <SED-1520DAA.h>
+#include "stdio.h"
 
 #define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
 #define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000+4*n)))
@@ -54,6 +55,7 @@ int fputc(int ch, FILE *f) {
   }
   return(ch);
 }
+
 
 /* USER CODE END Includes */
 
@@ -133,11 +135,11 @@ int main(void)
 	
 	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 	
-	/*LCD_init(&LCD);
+	LCD_init(&LCD);
 
 	for(int i=0; i<30; i++){
 		LCD_Write_Pxl(&LCD,1,1,LCD_PXL_SET);
-	}*/
+	}
 
   /* USER CODE END 2 */
 
@@ -145,9 +147,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		HAL_GPIO_WritePin(LCD.A_0.Port, LCD.A_0.Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(LCD.nRD.Port, LCD.nRD.Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(LCD.nWR.Port, LCD.nWR.Pin, GPIO_PIN_SET);
+		//HAL_GPIO_WritePin(LCD.A_0.Port, LCD.A_0.Pin, GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(LCD.nRD.Port, LCD.nRD.Pin, GPIO_PIN_RESET);
+		//HAL_GPIO_WritePin(LCD.nWR.Port, LCD.nWR.Pin, GPIO_PIN_SET);
 		
 		//LCD_init(&LCD);
 		/*for(int i=0; i<30; i++){
@@ -161,6 +163,7 @@ int main(void)
 		}*/
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		HAL_Delay(250);
+		printf("test");
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -266,8 +269,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|DB2_Pin|DB3_Pin 
-                          |DB4_Pin|DB5_Pin|DB6_Pin|DB7_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, A0_Pin|CS1_Pin|nRD_Pin|nWR_Pin 
@@ -279,18 +281,18 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA0 PA1 DB2_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|DB2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : DB3_Pin DB4_Pin DB5_Pin DB6_Pin 
-                           DB7_Pin */
-  GPIO_InitStruct.Pin = DB3_Pin|DB4_Pin|DB5_Pin|DB6_Pin 
-                          |DB7_Pin;
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA1 PA2 PA3 PA4 
+                           PA5 PA6 PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4 
+                          |GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : A0_Pin CS1_Pin nRD_Pin nWR_Pin 

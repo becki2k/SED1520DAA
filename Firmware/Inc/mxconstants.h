@@ -38,18 +38,6 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define DB2_Pin GPIO_PIN_2
-#define DB2_GPIO_Port GPIOA
-#define DB3_Pin GPIO_PIN_3
-#define DB3_GPIO_Port GPIOA
-#define DB4_Pin GPIO_PIN_4
-#define DB4_GPIO_Port GPIOA
-#define DB5_Pin GPIO_PIN_5
-#define DB5_GPIO_Port GPIOA
-#define DB6_Pin GPIO_PIN_6
-#define DB6_GPIO_Port GPIOA
-#define DB7_Pin GPIO_PIN_7
-#define DB7_GPIO_Port GPIOA
 #define A0_Pin GPIO_PIN_0
 #define A0_GPIO_Port GPIOB
 #define CS1_Pin GPIO_PIN_1

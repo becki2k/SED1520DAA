@@ -56,6 +56,8 @@
 void send_cmd(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW, uint8_t Command);
 uint8_t data_read(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW, uint8_t Command, uint8_t Recieve[]);
 void data_write(LCD_Handle *pDisplay, uint8_t Command[]);
+void init_GPIO_Input(GPIO_TypeDef *Port, uint16_t Pin);
+void init_GPIO_Output(GPIO_TypeDef *Port, uint16_t Pin);
 uint8_t read_status(LCD_Handle *pDisplay);
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -107,6 +109,7 @@ uint8_t LCD_init(LCD_Handle *pDisplay)
 	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);	if(DEBUG)printf("Status: %d\n", status);}
 	
 	if(DEBUG)printf("Start Init-Funktion\n");
+	printf("Start Init-Funktion\n");
 	uint8_t status = 0;
 	while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);	if(DEBUG)printf("Status: %d\n", status);}
 	
@@ -205,6 +208,22 @@ void data_write(LCD_Handle *pDisplay, uint8_t Command[])
 	
 }
 
+void init_GPIO_Output(GPIO_TypeDef *Port, uint16_t Pin){
+  GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.Pin = Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(Port, &GPIO_InitStruct);
+}
+
+
+void init_GPIO_Input(GPIO_TypeDef *Port, uint16_t Pin){
+	GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(Port, &GPIO_InitStruct);
+}
 /**
   * @}
   */
