@@ -56,7 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 volatile uint8_t status;
 /* Private function prototypes -----------------------------------------------*/
-void send_cmd(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW, uint8_t Command);
+void send_cmd(LCD_Handle *pDisplay, uint8_t Command, uint8_t Controller);
 uint8_t data_read(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW, uint8_t Command, uint8_t Recieve[]);
 void data_write(LCD_Handle *pDisplay, uint8_t Command[]);
 void init_GPIO_Input(GPIO_TypeDef *Port, uint16_t Pin);
@@ -66,14 +66,19 @@ void init_GPIO_Output(GPIO_TypeDef *Port, uint16_t Pin);
 /**
  *	@param ctrl_RW Indicates if command is a read- or write-operation. (High=Read, Low=Write)
  */
-void send_cmd(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW, uint8_t Command)
+void send_cmd(LCD_Handle *pDisplay, uint8_t Command, uint8_t Controller)
 {
-	HAL_GPIO_WritePin(pDisplay->A_0.Port, pDisplay->A_0.Pin, ctrl_A0);
-	HAL_GPIO_WritePin(pDisplay->nRD.Port, pDisplay->nRD.Pin, (GPIO_PinState)~ctrl_RW);
-	HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, ctrl_RW);
-	HAL_GPIO_WritePin(pDisplay->CS1.Port, pDisplay->CS1.Pin, GPIO_PIN_RESET);
+	//wait for status
+	//
+	HAL_Delay(10);	
+	HAL_GPIO_WritePin(pDisplay->A_0.Port, pDisplay->A_0.Pin, (GPIO_PinState)0);
+	HAL_GPIO_WritePin(pDisplay->nRD.Port, pDisplay->nRD.Pin, (GPIO_PinState)1);
+	HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, (GPIO_PinState)0);
 	
-	HAL_Delay(5);
+	if(Controller==0)	{HAL_GPIO_WritePin(pDisplay->CS1.Port, pDisplay->CS1.Pin, (GPIO_PinState)0);}
+	else							{HAL_GPIO_WritePin(pDisplay->CS2.Port, pDisplay->CS2.Pin, (GPIO_PinState)0);}
+
+	HAL_Delay(1);
 	HAL_GPIO_WritePin(pDisplay->DB0.Port, pDisplay->DB0.Pin, (GPIO_PinState)((Command >> 0) & 0x01));
 	HAL_GPIO_WritePin(pDisplay->DB1.Port, pDisplay->DB1.Pin, (GPIO_PinState)((Command >> 1) & 0x01));
 	HAL_GPIO_WritePin(pDisplay->DB2.Port, pDisplay->DB2.Pin, (GPIO_PinState)((Command >> 2) & 0x01));
@@ -82,25 +87,10 @@ void send_cmd(LCD_Handle *pDisplay, GPIO_PinState ctrl_A0, GPIO_PinState ctrl_RW
 	HAL_GPIO_WritePin(pDisplay->DB5.Port, pDisplay->DB5.Pin, (GPIO_PinState)((Command >> 5) & 0x01));
 	HAL_GPIO_WritePin(pDisplay->DB6.Port, pDisplay->DB6.Pin, (GPIO_PinState)((Command >> 6) & 0x01));
 	HAL_GPIO_WritePin(pDisplay->DB7.Port, pDisplay->DB7.Pin, (GPIO_PinState)((Command >> 7) & 0x01));
-	//GPIOA->ODR = Command & 0x00FF;
-	
-	switch(ctrl_RW){
-		case GPIO_PIN_SET:
-			HAL_GPIO_WritePin(pDisplay->nRD.Port, pDisplay->nRD.Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-			HAL_GPIO_WritePin(pDisplay->nRD.Port, pDisplay->nRD.Pin, GPIO_PIN_SET);
-		break;
-		case GPIO_PIN_RESET:
-			HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, GPIO_PIN_RESET);
-			HAL_Delay(1);
-			HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, GPIO_PIN_SET);
-		break;
-	}
 	HAL_Delay(1);
 	
-	HAL_GPIO_WritePin(pDisplay->CS1.Port, pDisplay->CS1.Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(pDisplay->nWR.Port, pDisplay->nWR.Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(pDisplay->CS1.Port, pDisplay->CS1.Pin, (GPIO_PinState)1);
+	HAL_GPIO_WritePin(pDisplay->CS2.Port, pDisplay->CS2.Pin, (GPIO_PinState)1);
 }
 
 
@@ -123,51 +113,38 @@ uint8_t LCD_init(LCD_Handle *pDisplay)
 	while(read_status(pDisplay, 0) >= 0x80){status = read_status(pDisplay, 0);		if(DEBUG)printf("Status: %d\n", status);}
 	
 //(a)Display off
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_OFF);
-	/*while(read_status(pDisplay) >= 0x80){
-		status = read_status(pDisplay);
-		if(DEBUG)printf("Status: %d\n", status);
-	}*/
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_OFF);
 	
 	//(-)reset
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_RESET);
-	/*while(read_status(pDisplay) >= 0x80){
-		status = read_status(pDisplay);
-		if(DEBUG)printf("Status: %d\n", status);
-	}*/
+	send_cmd(pDisplay, LCD_RESET, 0);
+	send_cmd(pDisplay, LCD_RESET, 1);
+	
+	//WAIT FOR STATUS
+	HAL_Delay(50);
 	
 	//(b)Display start line register: First line
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_STARTLINE + 0x00);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_STARTLINE + 0x00);
 	
 	//(c)Static drive off
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_STATIC_DRIVER_OFF);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_STATIC_DRIVER_OFF);
 	
 	//(d)Column address counter: Address 0
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_SET_COLUMN_ADDRESS);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_SET_COLUMN_ADDRESS);
 	
 	//(e)Page address register: Page 0
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_SET_PAGE_ADRESS + 0x00);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_SET_PAGE_ADRESS + 0x00);
 	
 	//(f)Select duty: 1/32
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DUTY_1_32);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DUTY_1_32);
 	
 	//(g)Select ADC: Forward (ADC command D0 = “0”, ADC status flag = “1”)
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_ADC_FORWARD);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_ADC_FORWARD);
 	
 	//(h)Read modify write off
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_END);
-	//while(read_status(pDisplay) >= 0x80){status = read_status(pDisplay);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_END);
 	
-	send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_ON);
-	while(read_status(pDisplay, 0) >= 0x80){status = read_status(pDisplay, 0);		if(DEBUG)printf("Status: %d\n", status);}
+	//send_cmd(pDisplay, GPIO_PIN_RESET, GPIO_PIN_RESET, LCD_DISPLAY_ON);
 	
-
 	return status;
 }
 

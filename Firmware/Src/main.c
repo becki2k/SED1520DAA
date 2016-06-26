@@ -124,7 +124,7 @@ int main(void)
 		printf("Status %d: %d\n", i, read_status(&LCD, 0));
 	}
 
-	for(int i=0; i<30; i++){
+	for(int i=0; i<80; i++){
 		LCD_Write_Pxl(&LCD,1,1,LCD_PXL_SET);
 	}
 
@@ -136,7 +136,7 @@ int main(void)
   {
 		
 		//LCD_init(&LCD);
-		for(int i=0; i<50; i++){
+		for(int i=0; i<80; i++){
 			LCD_Write_Pxl(&LCD,i,i,LCD_PXL_SET);
 		}
 		/*int x,y;
