@@ -56,6 +56,7 @@ typedef struct {
 /* Exported functions --------------------------------------------------------*/
 uint8_t LCD_init(LCD_Handle *pDisplay);
 void LCD_Write_Pxl(LCD_Handle *pDisplay, uint8_t x, uint8_t y, LCD_PXL_STATE State);
+uint8_t read_status(LCD_Handle *pDisplay, uint8_t Controller);
 /* Initialization and de-initialization functions  ******************************/
 /* Peripheral Control functions  ************************************************/
 

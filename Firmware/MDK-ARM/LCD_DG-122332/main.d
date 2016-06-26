@@ -26,4 +26,6 @@ lcd_dg-122332\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex
 lcd_dg-122332\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 lcd_dg-122332\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 lcd_dg-122332\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
+lcd_dg-122332\main.o: ../Inc/tim.h
+lcd_dg-122332\main.o: ../Inc/gpio.h
 lcd_dg-122332\main.o: ..\MDK-ARM\SED-1520DAA.h

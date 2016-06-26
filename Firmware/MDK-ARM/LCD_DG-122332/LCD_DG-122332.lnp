@@ -4,6 +4,8 @@
 "lcd_dg-122332\main.o"
 "lcd_dg-122332\stm32f1xx_hal_msp.o"
 "lcd_dg-122332\stm32f1xx_it.o"
+"lcd_dg-122332\gpio.o"
+"lcd_dg-122332\tim.o"
 "lcd_dg-122332\stm32f1xx_hal_cortex.o"
 "lcd_dg-122332\stm32f1xx_hal_flash.o"
 "lcd_dg-122332\stm32f1xx_hal_tim.o"

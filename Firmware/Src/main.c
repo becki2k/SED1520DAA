@@ -32,6 +32,8 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
+#include "tim.h"
+#include "gpio.h"
 
 /* USER CODE BEGIN Includes */
 #include <SED-1520DAA.h>
@@ -60,7 +62,6 @@ int fputc(int ch, FILE *f) {
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -69,11 +70,6 @@ TIM_HandleTypeDef htim1;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_TIM1_Init(void);
-                    
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -89,32 +85,19 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 	LCD_Handle LCD;
-	LCD.A_0.Port = GPIOB;
-	LCD.A_0.Pin = GPIO_PIN_0;
-	LCD.CS2.Port = GPIOB;
-	LCD.CS2.Pin = GPIO_PIN_1;
-	LCD.CS1.Port = GPIOB;
-	LCD.CS1.Pin = GPIO_PIN_6;
-	LCD.nRD.Port = GPIOB;
-	LCD.nRD.Pin = GPIO_PIN_4;
-	LCD.nWR.Port = GPIOB;
-	LCD.nWR.Pin = GPIO_PIN_5;
-	LCD.DB0.Port = GPIOA;
-	LCD.DB0.Pin = GPIO_PIN_0;
-	LCD.DB1.Port = GPIOA;
-	LCD.DB1.Pin = GPIO_PIN_1;
-	LCD.DB2.Port = GPIOA;
-	LCD.DB2.Pin = GPIO_PIN_2;
-	LCD.DB3.Port = GPIOA;
-	LCD.DB3.Pin = GPIO_PIN_3;
-	LCD.DB4.Port = GPIOA;
-	LCD.DB4.Pin = GPIO_PIN_4;
-	LCD.DB5.Port = GPIOA;
-	LCD.DB5.Pin = GPIO_PIN_5;
-	LCD.DB6.Port = GPIOA;
-	LCD.DB6.Pin = GPIO_PIN_6;
-	LCD.DB7.Port = GPIOA;
-	LCD.DB7.Pin = GPIO_PIN_7;
+	LCD.A_0.Port = GPIOB;		LCD.A_0.Pin = GPIO_PIN_0;
+	LCD.CS2.Port = GPIOB;		LCD.CS2.Pin = GPIO_PIN_1;
+	LCD.CS1.Port = GPIOB;		LCD.CS1.Pin = GPIO_PIN_6;
+	LCD.nRD.Port = GPIOB;		LCD.nRD.Pin = GPIO_PIN_4;
+	LCD.nWR.Port = GPIOB;		LCD.nWR.Pin = GPIO_PIN_5;
+	LCD.DB0.Port = GPIOA;		LCD.DB0.Pin = GPIO_PIN_0;
+	LCD.DB1.Port = GPIOA;		LCD.DB1.Pin = GPIO_PIN_1;
+	LCD.DB2.Port = GPIOA;		LCD.DB2.Pin = GPIO_PIN_2;
+	LCD.DB3.Port = GPIOA;		LCD.DB3.Pin = GPIO_PIN_3;
+	LCD.DB4.Port = GPIOA;		LCD.DB4.Pin = GPIO_PIN_4;
+	LCD.DB5.Port = GPIOA;		LCD.DB5.Pin = GPIO_PIN_5;
+	LCD.DB6.Port = GPIOA;		LCD.DB6.Pin = GPIO_PIN_6;
+	LCD.DB7.Port = GPIOA;		LCD.DB7.Pin = GPIO_PIN_7;
 	
 	
   /* USER CODE END 1 */
@@ -133,9 +116,13 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 	
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	
 	LCD_init(&LCD);
+	
+	for(int i=0; i<30; i++){
+		printf("Status %d: %d\n", i, read_status(&LCD, 0));
+	}
 
 	for(int i=0; i<30; i++){
 		LCD_Write_Pxl(&LCD,1,1,LCD_PXL_SET);
@@ -147,14 +134,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		//HAL_GPIO_WritePin(LCD.A_0.Port, LCD.A_0.Pin, GPIO_PIN_RESET);
-		//HAL_GPIO_WritePin(LCD.nRD.Port, LCD.nRD.Pin, GPIO_PIN_RESET);
-		//HAL_GPIO_WritePin(LCD.nWR.Port, LCD.nWR.Pin, GPIO_PIN_SET);
 		
 		//LCD_init(&LCD);
-		/*for(int i=0; i<30; i++){
-			LCD_Write_Pxl(&LCD,1,1,LCD_PXL_SET);
-		}*/
+		for(int i=0; i<50; i++){
+			LCD_Write_Pxl(&LCD,i,i,LCD_PXL_SET);
+		}
 		/*int x,y;
 		for(x=0; x<122; x++){
 			for(y=0; y<32; y++){
@@ -163,7 +147,7 @@ int main(void)
 		}*/
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		HAL_Delay(250);
-		printf("test");
+		
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -203,106 +187,6 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
-
-/* TIM1 init function */
-void MX_TIM1_Init(void)
-{
-
-  TIM_MasterConfigTypeDef sMasterConfig;
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
-  TIM_OC_InitTypeDef sConfigOC;
-
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 360;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 1000;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  HAL_TIM_PWM_Init(&htim1);
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig);
-
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig);
-
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1);
-
-  HAL_TIM_MspPostInit(&htim1);
-
-}
-
-/** Configure pins as 
-        * Analog 
-        * Input 
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
-void MX_GPIO_Init(void)
-{
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, A0_Pin|CS1_Pin|nRD_Pin|nWR_Pin 
-                          |CS2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PA0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PA1 PA2 PA3 PA4 
-                           PA5 PA6 PA7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4 
-                          |GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : A0_Pin CS1_Pin nRD_Pin nWR_Pin 
-                           CS2_Pin */
-  GPIO_InitStruct.Pin = A0_Pin|CS1_Pin|nRD_Pin|nWR_Pin 
-                          |CS2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
